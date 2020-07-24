@@ -1,1 +1,1 @@
-# BuildwihAI_Predictive_Algorithm
+# BuildwithAI Predictive Algorithm Challenge
