@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import random
 
-from save_parameters import save_to_json
+from Genetic.save_parameters import save_to_json
 from Genetic.seirs_model import seirs_prediction
 from Genetic.loss_evaluation import *
 from Genetic.GeneticOptimizer import GeneticOptimizer
