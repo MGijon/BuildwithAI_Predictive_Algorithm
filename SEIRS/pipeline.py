@@ -6,6 +6,7 @@ import pandas as pd
 
 from seirs_model import seirs_prediction
 from loss_evaluation import *
+from GeneticOptimizer import GeneticOptimizer, SEIRSModelGen
 
 #### PREFIXED VALUES ####
 from_this_day_to_predict = '2020-07-01'  # later to change for the '2020-07-27'
@@ -34,11 +35,19 @@ params = {
     'xi': 0.001  # Rate of re-susceptibility
 }
 
-# Apply the model and optain a prediction for the next 15 days
-infected_next_15_days = seirs_prediction(initI=US_daily[from_this_day_to_predict]['positive'],
-                                         initN=USA_population, **params)
+param_ranges = {
+    'beta': (0.0001, 0.5),  # Rate of transmission
+    'sigma': (0.0001, 0.5),  # Rate of progression
+    'gamma': (1 / 12.39, 1 / 12.39),  # Rate of recovery
+    'xi': (0.001, 0.001)  # Rate of re-susceptibility
+}
 
-print('Predictions from the next 15 days: ', [np.floor(x) for x in infected_next_15_days])
+# param_ranges = {
+#     'beta': (0.0001, 0.5),  # Rate of transmission
+#     'sigma': (0.0001, 0.5),  # Rate of progression
+#     'gamma': (0.0001, 0.5),  # Rate of recovery
+#     'xi': (0.0001, 0.1)  # Rate of re-susceptibility
+# }
 
 #### ERRORS ####
 ################
@@ -56,6 +65,29 @@ while start <= end:
     day = start.strftime('%Y-%m-%d')
     real_positives.append(US_daily[day]['positive'].values[0])  # date()
     start += step
+
+optimizer = GeneticOptimizer(SEIRSModelGen,
+                             initI=US_daily[from_this_day_to_predict]['positive'],
+                             initN=USA_population,
+                             params=params,
+                             param_ranges=param_ranges,
+                             error_func=loss_function,
+                             real_values=real_positives,
+                             period=15)
+
+optimizer.initialize()
+finished = False
+
+while not finished and optimizer.g < optimizer.max_gen:
+    finished, best = optimizer.iteration()
+
+infected_next_15_days = best
+
+# # Apply the model and optain a prediction for the next 15 days
+# infected_next_15_days = seirs_prediction(initI=US_daily[from_this_day_to_predict]['positive'],
+#                                          initN=USA_population, **params)
+
+print('Predictions from the next 15 days: ', [np.floor(x) for x in infected_next_15_days])
 
 print('Real cases: ', real_positives)
 
