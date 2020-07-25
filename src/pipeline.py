@@ -5,10 +5,10 @@ import numpy as np
 import pandas as pd
 import random
 
-from Genetic.save_parameters import save_to_json
-from Genetic.seirs_model import seirs_prediction
-from Genetic.loss_evaluation import *
-from Genetic.GeneticOptimizer import GeneticOptimizer
+from src.save_parameters import save_to_json
+from src.seirs_model import seirs_prediction
+from src.loss_evaluation import *
+from src.GeneticOptimizer import GeneticOptimizer
 from seirsplus.models import SEIRSModel
 
 random.seed(1138)
