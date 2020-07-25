@@ -5,14 +5,13 @@ import numpy as np
 import pandas as pd
 import random
 
+from save_parameters import save_to_json
 from seirs_model import seirs_prediction
 from loss_evaluation import *
 from GeneticOptimizer import GeneticOptimizer, SEIRSModelGen, SIR
 
-
 random.seed(1138)
 np.random.seed(1138)
-
 
 #### PREFIXED VALUES ####
 from_this_day_to_predict = '2020-07-01'  # later to change for the '2020-07-27'
@@ -116,7 +115,7 @@ while not finished and optimizer.g < optimizer.max_gen:
         best_counter = 0
     else:
         best_counter += 1
-    if best_counter == 100: # it can go on quite some time without changing the best fitness, depending on optimizer params
+    if best_counter == 100:  # it can go on quite some time without changing the best fitness, depending on optimizer params
         finished = True
 
 print(real_positives)
@@ -147,6 +146,12 @@ error_absolute = custom_loss(predicted_values=infected_next_15_days.reshape(-1, 
 
 print('MSE: ', errors)
 print('MAE: ', error_absolute)
+infected_next_15_days =map(int, infected_next_15_days)
+real_positives = map(int, real_positives)
+results = {'MSE': errors, 'MAE': error_absolute, 'predictions_next_15_days': list(infected_next_15_days),
+           'real_cases_15_days': list(real_positives)}
+
+save_to_json(best, results)
 # print('MAE weights: ', error_absolute_weights)
 
 # print('2020-07-01 : ', US_daily[from_this_day_to_predict]['positive'])
