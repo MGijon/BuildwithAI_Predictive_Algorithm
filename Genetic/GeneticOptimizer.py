@@ -1,5 +1,6 @@
 import numpy as np
-from numpy import random as rnd
+import random as rnd
+from numpy import random as nprnd
 
 from deap import base
 from deap import creator
@@ -135,8 +136,8 @@ class GeneticOptimizer:
         #                     self.param_ranges[param][0]
         model = self.Individual()
         for param in self.param_ranges:
-            model[param] = rnd.rand() * (self.param_ranges[param][1] - self.param_ranges[param][0]) +\
-                            self.param_ranges[param][0]
+            model[param] = nprnd.rand() * (self.param_ranges[param][1] - self.param_ranges[param][0]) + \
+                           self.param_ranges[param][0]
         model.fitness = fitness
         # return self.model_class(initI=self.initI, initN=self.initN, fitness=fitness, **params)
         return model
@@ -151,19 +152,19 @@ class GeneticOptimizer:
 
     def mut_func(self, model):
         for param in model:
-            if rnd.rand() < self.p_mut_ind:
-                if rnd.rand() < self.p_regen:
-                    model[param] = rnd.rand() * (self.param_ranges[param][1] - self.param_ranges[param][0]) + \
+            if nprnd.rand() < self.p_mut_ind:
+                if nprnd.rand() < self.p_regen:
+                    model[param] = nprnd.rand() * (self.param_ranges[param][1] - self.param_ranges[param][0]) + \
                                    self.param_ranges[param][0]
                 else:
                     model[param] += (self.param_ranges[param][1] - self.param_ranges[param][0]) *\
-                                    (rnd.rand() * self.mut_range * 2 - self.mut_range)
+                                    (nprnd.rand() * self.mut_range * 2 - self.mut_range)
                     model[param] = np.clip(model[param], self.param_ranges[param][0], self.param_ranges[param][1])
         return model
 
     def cross_func(self, model1, model2):
         for param in self.param_ranges:
-            if rnd.rand() < self.p_cross_ind:
+            if nprnd.rand() < self.p_cross_ind:
                 model1[param], model2[param] = model2[param], model1[param]
         return model1, model2
 
@@ -191,17 +192,18 @@ class GeneticOptimizer:
 
         # Clone the selected individuals
         offspring = list(map(self.toolbox.clone, self.pop))
+        rnd.shuffle(offspring)
         old_pop = list(map(self.toolbox.clone, self.pop))
 
         # Apply crossover and mutation on the offspring
         for child1, child2 in zip(offspring[::2], offspring[1::2]):
-            if rnd.rand() < self.p_cross:
+            if nprnd.rand() < self.p_cross:
                 self.toolbox.mate(child1, child2)
                 del child1.fitness.values
                 del child2.fitness.values
 
         for mutant in offspring:
-            if rnd.rand() < self.p_mut:
+            if nprnd.rand() < self.p_mut:
                 self.toolbox.mutate(mutant)
                 del mutant.fitness.values
 
