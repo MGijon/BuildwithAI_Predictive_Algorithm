@@ -36,10 +36,10 @@ params = {
 }
 
 param_ranges = {
-    'beta': (0.0001, 0.5),  # Rate of transmission
-    'sigma': (0.0001, 0.5),  # Rate of progression
-    'gamma': (1 / 12.39, 1 / 12.39),  # Rate of recovery
-    'xi': (0.001, 0.001)  # Rate of re-susceptibility
+    'beta': (0.0001, 2),  # Rate of transmission
+    'sigma': (1 / 14, 1 / 6),  # Rate of progression
+    'gamma': (1 / 10, 1 / 3),  # Rate of recovery
+    'xi': (0.00, 0.001)  # Rate of re-susceptibility
 }
 
 # param_ranges = {
@@ -73,7 +73,7 @@ optimizer = GeneticOptimizer(SEIRSModelGen,
                              param_ranges=param_ranges,
                              error_func=loss_function,
                              real_values=real_positives,
-                             period=15)
+                             period=15, max_gen=2000)
 
 optimizer.initialize()
 finished = False
@@ -81,24 +81,22 @@ finished = False
 while not finished and optimizer.g < optimizer.max_gen:
     finished, best = optimizer.iteration()
 
-infected_next_15_days = best
-
 # # Apply the model and optain a prediction for the next 15 days
-# infected_next_15_days = seirs_prediction(initI=US_daily[from_this_day_to_predict]['positive'],
-#                                          initN=USA_population, **params)
+infected_next_15_days = seirs_prediction(initI=US_daily[from_this_day_to_predict]['positive'],
+                                         initN=USA_population, **best)
 
 print('Predictions from the next 15 days: ', [np.floor(x) for x in infected_next_15_days])
 
 print('Real cases: ', real_positives)
 
-errors = loss_function(predicted_values=infected_next_15_days, real_values=real_positives)
-error_absolute = custom_loss(predicted_values=infected_next_15_days, real_values=real_positives)
-error_absolute_weights = custom_loss(predicted_values=infected_next_15_days,
-                                     real_values=real_positives,
-                                     sample_weight=[])
+errors = loss_function(predicted_values=infected_next_15_days.reshape(-1, 1), real_values=real_positives)
+error_absolute = custom_loss(predicted_values=infected_next_15_days.reshape(-1, 1), real_values=real_positives)
+# error_absolute_weights = custom_loss(predicted_values=infected_next_15_days.reshape(-1, 1),
+#                                      real_values=real_positives),
+#                                      sample_weight=[])
 
 print('MSE: ', errors)
 print('MAE: ', error_absolute)
-print('MAE weights: ', error_absolute_weights)
+# print('MAE weights: ', error_absolute_weights)
 
-#print('2020-07-01 : ', US_daily[from_this_day_to_predict]['positive'])
+# print('2020-07-01 : ', US_daily[from_this_day_to_predict]['positive'])
