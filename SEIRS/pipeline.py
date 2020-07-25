@@ -37,9 +37,9 @@ params = {
 
 param_ranges = {
     'beta': (0.0001, 2),  # Rate of transmission
-    'sigma': (1 / 14, 1 / 6),  # Rate of progression
-    'gamma': (1 / 10, 1 / 3),  # Rate of recovery
-    'xi': (0.00, 0.001)  # Rate of re-susceptibility
+    'sigma': (1 / 14, 1),  # Rate of progression
+    'gamma': (1 / 10, 1),  # Rate of recovery
+    'xi': (0.00, 0.02)  # Rate of re-susceptibility
 }
 
 # param_ranges = {
@@ -73,13 +73,21 @@ optimizer = GeneticOptimizer(SEIRSModelGen,
                              param_ranges=param_ranges,
                              error_func=loss_function,
                              real_values=real_positives,
-                             period=15, max_gen=2000)
+                             period=15, max_gen=3000)
 
 optimizer.initialize()
 finished = False
-
+best_counter = 0
+current_best = None
 while not finished and optimizer.g < optimizer.max_gen:
     finished, best = optimizer.iteration()
+    if best != current_best:
+        current_best = best
+        best_counter = 0
+    else:
+        best_counter += 1
+    if best_counter == 50:
+        finished = True
 
 # # Apply the model and optain a prediction for the next 15 days
 infected_next_15_days = seirs_prediction(initI=US_daily[from_this_day_to_predict]['positive'],
