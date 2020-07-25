@@ -7,7 +7,7 @@ import random
 
 from src.save_parameters import save_to_json
 from src.seirs_model import seirs_prediction
-from src.loss_evaluation import *
+from src.loss_evaluation import mse_loss, mae_loss
 from src.GeneticOptimizer import GeneticOptimizer
 from seirsplus.models import SEIRSModel
 
@@ -48,11 +48,6 @@ param_ranges = {
     'xi': (0.001, 0.001)  # Rate of re-susceptibility
 }
 
-# param_ranges_sir = {
-#     'beta': (0.0001, 0.5),
-#     'gamma': (0.0001, 0.5)
-# }
-
 
 #### ERRORS ####
 ################
@@ -71,25 +66,6 @@ while start <= end:
     real_positives.append(US_daily[day]['positive'].values[0])  # date()
     start += step
 
-
-# sir = SIR(USA_population, US_daily[day]['positive'].values[0], 0.1, 0.02)
-# sir.run(T=15)
-# real_positives = sir.total_num_infections()[10::10]
-
-# optimizer = GeneticOptimizer(SIR,
-#                              initI=US_daily[day]['positive'].values[0],
-#                              initN=USA_population,
-#                              param_ranges=param_ranges_sir,
-#                              error_func=loss_function,
-#                              real_values=real_positives,
-#                              period=15,
-#                              max_gen=1000,
-#                              stop_cond=10000,
-#                              # tournament_size=7,
-#                              mut_range=0.02,
-#                              p_regen=0.2,
-#                              p_mut=0.4)
-
 optimizer = GeneticOptimizer(SEIRSModel,
                              initI=US_daily[from_this_day_to_predict]['positive'].values[0],
                              initN=USA_population,
@@ -99,7 +75,6 @@ optimizer = GeneticOptimizer(SEIRSModel,
                              period=15,
                              max_gen=3000,
                              stop_cond=10000,
-                             # tournament_size=7,
                              mut_range=0.1,
                              p_regen=0.2,
                              p_mut=0.4)
@@ -116,24 +91,16 @@ while not finished and optimizer.g < optimizer.max_gen:
         best_counter = 0
     else:
         best_counter += 1
-    if best_counter == 100:  # it can go on quite some time without changing the best fitness, depending on optimizer params
+    # it can go on quite some time without changing the best fitness, depending on optimizer params
+    if best_counter == 100:
         finished = True
 
 print(real_positives)
-
-# infected_next_15_days = np.array(best)
-# sir_pred = SIR(USA_population, US_daily[day]['positive'].values[0], **best)
-# sir_pred.run(T=15)
-# infected_next_15_days = np.array(sir_pred.total_num_infections()[10::10])
 
 # Apply the model and optain a prediction for the next 15 days
 infected_next_15_days = seirs_prediction(initI=US_daily[from_this_day_to_predict]['positive'].values[0],
                                          initN=USA_population,
                                          **best)
-
-# # Apply the model and optain a prediction for the next 15 days
-# infected_next_15_days = seirs_prediction(initI=US_daily[from_this_day_to_predict]['positive'],
-#                                          initN=USA_population, **params)
 
 print('Predictions from the next 15 days: ', [np.floor(x) for x in infected_next_15_days])
 
@@ -153,6 +120,3 @@ results = {'MSE': mse_error, 'MAE': mae_error, 'predictions_next_15_days': list(
            'real_cases_15_days': list(real_positives)}
 
 save_to_json(best, results)
-# print('MAE weights: ', error_absolute_weights)
-
-# print('2020-07-01 : ', US_daily[from_this_day_to_predict]['positive'])
