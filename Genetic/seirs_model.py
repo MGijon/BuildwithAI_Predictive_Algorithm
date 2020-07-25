@@ -1,4 +1,4 @@
-from seirsplus.models import *
+from seirsplus.models import SEIRSModel
 
 params = {
     'beta': 0.155,     # Rate of transmission
