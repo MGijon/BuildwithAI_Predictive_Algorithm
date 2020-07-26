@@ -17,7 +17,7 @@ class Predictor:
     # USA population according to a random internet source
     USA_population = 328_200_000
 
-    def __init__(self, loss_days, init_date):
+    def __init__(self, loss_days, init_date, genetic_params=None):
         # Prefixed values
         self.loss_days = loss_days
         self.from_this_day_to_predict = init_date
@@ -30,7 +30,7 @@ class Predictor:
         self.optimizer = None
         self.finished = None
         self.best = None
-        self._init_optimizer()
+        self._init_optimizer(genetic_params)
 
     def get_real_data(self):
         start = datetime.datetime.strptime(self.from_this_day_to_predict, '%Y-%m-%d')
@@ -50,25 +50,29 @@ class Predictor:
 
         return real_positives
 
-    def _init_optimizer(self):
+    def _init_optimizer(self, genetic_params):
         param_ranges = {
             'beta': (0.0001, 2),  # Rate of transmission
             'sigma': (1 / 14, 1),  # Rate of progression
             'gamma': (1 / 10, 1),  # Rate of recovery
             'xi': (0.001, 0.001)  # Rate of re-susceptibility
         }
+        if not genetic_params:
+            genetic_params = {
+                  'max_gen': 3000,
+                  'stop_cond': 10000,
+                  'mut_range': 0.1,
+                  'p_regen': 0.2,
+                  'p_mut': 0.4
+            }
         self.optimizer = GeneticOptimizer(SEIRSModel,
                                           initI=self.US_daily[self.from_this_day_to_predict]['positive'].values[0],
                                           initN=self.USA_population,
                                           param_ranges=param_ranges,
                                           error_func=mse_loss,
                                           real_values=self.real_positives,
-                                          period=15,
-                                          max_gen=3000,
-                                          stop_cond=10000,
-                                          mut_range=0.1,
-                                          p_regen=0.2,
-                                          p_mut=0.4)
+                                          period=self.loss_days,
+                                          **genetic_params)
 
         self.optimizer.initialize(population=100)
         self.finished = False
