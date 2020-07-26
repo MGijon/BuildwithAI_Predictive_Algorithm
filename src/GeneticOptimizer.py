@@ -8,6 +8,8 @@ from deap import base
 from deap import creator
 from deap import tools
 
+creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+
 
 # Disable
 def block_print():
@@ -49,7 +51,6 @@ class GeneticOptimizer:
         self.best = None
         self.finished = False
 
-        creator.create("FitnessMax", base.Fitness, weights=(1.0,))
         # creator.create("Individual", dict, fitness=creator.FitnessMax)
 
         self.toolbox = base.Toolbox()
