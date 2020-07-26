@@ -17,7 +17,8 @@ class Predictor:
     # USA population according to a random internet source
     USA_population = 328_200_000
 
-    def __init__(self, loss_days, init_date, state=None, param_ranges=None, genetic_params=None, states_data=None):
+    def __init__(self, loss_days, init_date, state=None, param_ranges=None, genetic_params=None, states_data=None,
+                 training=True):
         # Prefixed values
         self.loss_days = loss_days
         self.from_this_day_to_predict = init_date
@@ -37,7 +38,8 @@ class Predictor:
 
         # Initialization
         self.pred_positives = None
-        self.real_positives = self.get_real_data()
+        if training:
+            self.real_positives = self.get_real_data()
         self.optimizer = None
         self.finished = None
         self.best = None
@@ -107,43 +109,46 @@ class Predictor:
                 self.finished = True
         return iterations
 
-    def get_pred_positives(self):
+    def get_pred_positives(self, date_to_start_predictions, number_of_days):
         assert self.best is not None
         # Apply the model and optain a prediction for the next 15 days
         infected_next_15_days = seirs_prediction(
-            initI=self.US_daily[self.from_this_day_to_predict]['positive'].values[0],
+            initI=self.US_daily[date_to_start_predictions]['positive'].values[0],
             initN=self.USA_population,
+            initR=self.US_daily[date_to_start_predictions]['recovered'].values[0],
+            predict_num_days=number_of_days,
             **self.best)
 
-        self.pred_positives = list(infected_next_15_days.reshape(-1,))
+        pred_positives = list(infected_next_15_days.reshape(-1, ))
 
-        return self.pred_positives
+        return pred_positives
 
     def get_errors(self):
-        if not self.pred_positives:
-            self.get_pred_positives()
+        predicted_in_validation_period = self.get_pred_positives(self.from_this_day_to_predict, self.loss_days)
 
-        mse_error = mse_loss(predicted_values=self.pred_positives, real_values=self.real_positives)
-        mae_error = mae_loss(predicted_values=self.pred_positives, real_values=self.real_positives)
-        wmae_error = weighted_mae_loss(predicted_values=self.pred_positives, real_values=self.real_positives)
+        mse_error = mse_loss(predicted_values=predicted_in_validation_period, real_values=self.real_positives)
+        mae_error = mae_loss(predicted_values=predicted_in_validation_period, real_values=self.real_positives)
+        wmae_error = weighted_mae_loss(predicted_values=predicted_in_validation_period, real_values=self.real_positives)
 
         return mse_error, mae_error, wmae_error
 
-    def report(self):
-        if not self.pred_positives:
-            self.get_pred_positives()
+    def report(self, date_to_start_predictions, number_of_days):
+        predicted_in_validation_period = self.get_pred_positives(self.from_this_day_to_predict, self.loss_days)
 
-        print("Real cases: {}".format(self.real_positives))
-        print("Pred cases: {}".format(self.pred_positives))
+        print("Real cases ({}): {}".format(self.from_this_day_to_predict, self.real_positives))
+        print("Pred cases ({}): {}".format(self.from_this_day_to_predict, predicted_in_validation_period))
 
-        print('Predictions from the next 15 days: ', [int(np.floor(x)) for x in self.pred_positives])
+        prediced_in_future_period = self.get_pred_positives(date_to_start_predictions, number_of_days)
+
+        print('Predictions from ({}) the next 15 days: '.format(date_to_start_predictions),
+              [int(np.floor(x)) for x in prediced_in_future_period])
 
         mse_error, mae_error, wmae_error = self.get_errors()
 
         print('MSE: ', mse_error)
         print('MAE: ', mae_error)
         print('Weighted MAE: ', wmae_error)
-        int_pred_positives = map(int, self.pred_positives)
+        int_pred_positives = map(int, predicted_in_validation_period)
         int_real_positives = map(int, self.real_positives)
         results = {'MSE': mse_error, 'MAE': mae_error, 'Weighted MAE': wmae_error,
                    'predictions_next_15_days': list(int_pred_positives),
@@ -151,10 +156,12 @@ class Predictor:
 
         save_to_json(self.best, results, state=self.state)
 
-    def generate_data_for_plots(self):
+    def generate_data_for_plots(self, date_to_start_predictions, number_of_days):
         prediced_s, prediced_e, prediced_i, prediced_r, prediced_f = seirs_prediction_with_a_lot_of_stuff(
-            initI=self.US_daily[self.from_this_day_to_predict]['positive'].values[0],
+            initI=self.US_daily[date_to_start_predictions]['positive'].values[0],
             initN=self.USA_population,
+            initR=self.US_daily[date_to_start_predictions]['recovered'].values[0],
+            predict_num_days=number_of_days,
             **self.best)
         prediced_s = list(map(int, prediced_s))
         prediced_e = list(map(int, prediced_e))

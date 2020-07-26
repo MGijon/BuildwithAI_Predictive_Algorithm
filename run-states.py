@@ -7,6 +7,11 @@ from src.loss_evaluation import mean_absolute_error, weighted_mae_loss
 from src.pipeline import Predictor
 
 # STATES = ['AK']
+NUMBER_OF_DAYS = 21
+
+BEGIN_DATE = '2020-07-25'
+
+
 STATES = ['AK', 'AL', 'AR', 'AS', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'GU', 'HI', 'IA', 'ID', 'IL', 'IN',
           'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MP', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM',
           'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'PR', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VI', 'VT', 'WA', 'WI',
@@ -21,7 +26,7 @@ param_ranges = {
             }
 
 genetic_params = {
-                  'max_gen': 3000,
+                  'max_gen': 30,
                   'stop_cond': 10000,
                   'mut_range': 0.1,
                   'p_regen': 0.2,
@@ -37,10 +42,10 @@ us_results = {
 }
 
 data = get_states_daily()
-data = fill_data(data, '2020-07-25')
-for state in STATES:
+data = fill_data(data, BEGIN_DATE)
+for state in STATES[:1]:
     print("Predicting for {}...".format(state))
-    predictor = Predictor(loss_days=15, init_date='2020-07-01', state=state, param_ranges=param_ranges,
+    predictor = Predictor(loss_days=NUMBER_OF_DAYS, init_date=BEGIN_DATE, state=state, param_ranges=param_ranges,
                           genetic_params=genetic_params, states_data=data)
     iterations = predictor.run()
 
@@ -54,7 +59,7 @@ for state in STATES:
     # predictor.report()
     print("Done!..")
 
-us_predictor = Predictor(loss_days=15, init_date='2020-07-01', param_ranges=param_ranges, genetic_params=genetic_params)
+us_predictor = Predictor(loss_days=NUMBER_OF_DAYS, init_date=BEGIN_DATE, param_ranges=param_ranges, genetic_params=genetic_params)
 real_data = us_predictor.US_daily
 
 start = datetime.datetime.strptime(us_predictor.from_this_day_to_predict, '%Y-%m-%d')
