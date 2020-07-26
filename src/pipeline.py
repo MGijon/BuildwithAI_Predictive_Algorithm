@@ -148,13 +148,19 @@ class Predictor:
         print('MSE: ', mse_error)
         print('MAE: ', mae_error)
         print('Weighted MAE: ', wmae_error)
-        int_pred_positives = map(int, predicted_in_validation_period)
+        int_predicted_in_validation_period = map(int, predicted_in_validation_period)
         int_real_positives = map(int, self.real_positives)
+        int_predicted_in_future_period = map(int, prediced_in_future_period)
         results = {'MSE': mse_error, 'MAE': mae_error, 'Weighted MAE': wmae_error,
-                   'predictions_next_15_days': list(int_pred_positives),
-                   'real_cases_15_days': list(int_real_positives)}
+                   'validation_predictions_({})'.format(self.from_this_day_to_predict): list(
+                       int_predicted_in_validation_period),
+                   'real_cases_({})'.format(self.from_this_day_to_predict): list(int_real_positives),
+                   'final_prediction_({})'.format(date_to_start_predictions): list(int_predicted_in_future_period)}
 
-        save_to_json(self.best, results, state=self.state)
+        to_save = {**self.best, **results}
+
+        save_to_json(to_save, state=self.state)
+        return to_save
 
     def generate_data_for_plots(self, date_to_start_predictions, number_of_days):
         prediced_s, prediced_e, prediced_i, prediced_r, prediced_f = seirs_prediction_with_a_lot_of_stuff(

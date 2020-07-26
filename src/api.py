@@ -16,6 +16,7 @@ def get_us_daily():
     US_daily.set_index('date', inplace=True)
     return US_daily
 
+
 def get_states_daily():
     # API Call and data preparation
     headers = {}
@@ -28,13 +29,17 @@ def get_states_daily():
     # US_states.set_index('date', inplace=True)
     return US_states
 
+
 def fill_data(data, end_date):
     start = datetime.datetime.strptime(end_date, '%Y-%m-%d')
     step = datetime.timedelta(days=1)
-    states = ['AK', 'AL', 'AR', 'AS', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'GU', 'HI', 'IA', 'ID', 'IL', 'IN',
-          'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MP', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM',
-          'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'PR', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VI', 'VT', 'WA', 'WI',
-          'WV', 'WY']
+    states = ['AK', 'AL', 'AR', 'AS', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'GU', 'HI', 'IA', 'ID', 'IL',
+              'IN',
+              'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MP', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ',
+              'NM',
+              'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'PR', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VI', 'VT', 'WA',
+              'WI',
+              'WV', 'WY']
 
     for state in states:
         date = start
