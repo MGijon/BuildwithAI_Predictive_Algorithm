@@ -79,12 +79,12 @@ class Predictor:
         self.optimizer.initialize(population=100)
         self.finished = False
 
-    def run(self):
+    def run(self, verbose=0):
         best_counter = 0
         current_best = None
         iterations = []
         while not self.finished and self.optimizer.g < self.optimizer.max_gen:
-            self.finished, self.best = self.optimizer.iteration()
+            self.finished, self.best = self.optimizer.iteration(verbose=verbose)
             iterations.append(self.best)
             if self.best != current_best:
                 current_best = self.best

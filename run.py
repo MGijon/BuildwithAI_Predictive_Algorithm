@@ -18,7 +18,7 @@ genetic_params = {
             }
 
 predictor = Predictor(loss_days=15, init_date='2020-07-01', param_ranges=param_ranges, genetic_params=genetic_params)
-iterations = predictor.run()
+iterations = predictor.run(verbose=1)
 
 with open('results/iterations.json', 'w') as json_file:
     json.dump(iterations, json_file, sort_keys=True, indent=4)

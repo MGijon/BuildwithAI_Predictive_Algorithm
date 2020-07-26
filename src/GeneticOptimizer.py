@@ -118,15 +118,17 @@ class GeneticOptimizer:
         # Variable keeping track of the number of generations
         self.g = 0
 
-    def iteration(self):
+    def iteration(self, verbose=True):
         # Begin the evolution
         if self.finished:
-            print("Stop condition is already satisfied!")
+            if verbose:
+                print("Stop condition is already satisfied!")
             return self.finished, self.best
 
         # A new generation
         self.g += 1
-        print("-- Generation %i --" % self.g)
+        if verbose:
+            print("-- Generation %i --" % self.g)
 
         # Clone the selected individuals
         offspring = list(map(self.toolbox.clone, self.pop))
@@ -165,12 +167,13 @@ class GeneticOptimizer:
         sum2 = sum(x * x for x in self.fits)
         std = abs(sum2 / length - mean ** 2) ** 0.5
 
-        print("  Min %s" % min(self.fits))
-        print("  Max %s" % max(self.fits))
-        print("  Avg %s" % mean)
-        print("  Std %s" % std)
         self.best = self.pop[np.argmax(self.fits)]
-        print("  parameters: {}".format(self.best))
+        if verbose:
+            print("  Min %s" % min(self.fits))
+            print("  Max %s" % max(self.fits))
+            print("  Avg %s" % mean)
+            print("  Std %s" % std)
+            print("  parameters: {}".format(self.best))
 
         self.finished = max(self.fits) >= self.stop_cond
 
