@@ -17,7 +17,7 @@ class Predictor:
     # USA population according to a random internet source
     USA_population = 328_200_000
 
-    def __init__(self, loss_days, init_date, state=None, param_ranges=None, genetic_params=None):
+    def __init__(self, loss_days, init_date, state=None, param_ranges=None, genetic_params=None, states_data=None):
         # Prefixed values
         self.loss_days = loss_days
         self.from_this_day_to_predict = init_date
@@ -27,7 +27,10 @@ class Predictor:
             self.US_daily = get_us_daily()
             self.state = ""
         else:
-            self.US_daily = get_states_daily()
+            if states_data is None:
+                self.US_daily = get_states_daily()
+            else:
+                self.US_daily = states_data
             self.US_daily = self.US_daily[self.US_daily['state'] == state]
             self.US_daily.set_index('date', inplace=True)
             self.state = state

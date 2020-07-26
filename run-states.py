@@ -2,6 +2,7 @@ import datetime
 import json
 import numpy as np
 
+from src.api import get_states_daily, fill_data
 from src.loss_evaluation import mean_absolute_error, weighted_mae_loss
 from src.pipeline import Predictor
 
@@ -33,10 +34,13 @@ us_results = {
     'R': np.zeros(15, dtype=np.float),
     'F': np.zeros(15, dtype=np.float)
 }
+
+data = get_states_daily()
+data = fill_data(data, '2020-07-25')
 for state in STATES:
     print("Predicting for {}...".format(state))
     predictor = Predictor(loss_days=15, init_date='2020-07-01', state=state, param_ranges=param_ranges,
-                          genetic_params=genetic_params)
+                          genetic_params=genetic_params, states_data=data)
     iterations = predictor.run()
 
     state_results = predictor.generate_data_for_plots()
