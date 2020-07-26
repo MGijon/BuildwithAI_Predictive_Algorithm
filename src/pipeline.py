@@ -82,8 +82,10 @@ class Predictor:
     def run(self):
         best_counter = 0
         current_best = None
+        iterations = []
         while not self.finished and self.optimizer.g < self.optimizer.max_gen:
             self.finished, self.best = self.optimizer.iteration()
+            iterations.append(self.best)
             if self.best != current_best:
                 current_best = self.best
                 best_counter = 0
@@ -92,6 +94,7 @@ class Predictor:
             # it can go on quite some time without changing the best fitness, depending on optimizer params
             if best_counter == 100:
                 self.finished = True
+        return iterations
 
     def report(self):
         print(self.real_positives)

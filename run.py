@@ -1,5 +1,6 @@
-from src.pipeline import Predictor
+import json
 
+from src.pipeline import Predictor
 
 param_ranges = {
                 'beta': (0.0001, 2),  # Rate of transmission
@@ -17,5 +18,9 @@ genetic_params = {
             }
 
 predictor = Predictor(loss_days=15, init_date='2020-07-01', param_ranges=param_ranges, genetic_params=genetic_params)
-predictor.run()
+iterations = predictor.run()
+
+with open('results/iterations.json', 'w') as json_file:
+    json.dump(iterations, json_file, sort_keys=True, indent=4)
+
 predictor.report()
