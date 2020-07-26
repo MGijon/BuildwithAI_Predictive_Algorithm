@@ -103,7 +103,7 @@ class Predictor:
             else:
                 best_counter += 1
             # it can go on quite some time without changing the best fitness, depending on optimizer params
-            if best_counter == 10:
+            if best_counter == 100:
                 self.finished = True
         return iterations
 
@@ -136,7 +136,7 @@ class Predictor:
         print("Real cases: {}".format(self.real_positives))
         print("Pred cases: {}".format(self.pred_positives))
 
-        print('Predictions from the next 15 days: ', [np.floor(x) for x in self.pred_positives])
+        print('Predictions from the next 15 days: ', [int(np.floor(x)) for x in self.pred_positives])
 
         mse_error, mae_error, wmae_error = self.get_errors()
 
