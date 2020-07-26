@@ -20,12 +20,13 @@ def enable_print():
 
 
 class GeneticOptimizer:
-    def __init__(self, model_class, initI, initN, param_ranges, error_func, real_values, mut_range=0.1,
+    def __init__(self, model_class, initI, initR, initN, param_ranges, error_func, real_values, mut_range=0.1,
                  p_mut=0.25, p_mut_ind=0.75, p_regen=0.2, p_cross=0.5, p_cross_ind=0.5, period=15, stop_cond=-1,
                  tournament_size=10,
                  max_gen=2000, start_fitness=-np.inf):
         self.model_class = model_class
         self.initI = initI
+        self.initR = initR
         self.initN = initN
         self.param_ranges = param_ranges
         self.error_func = error_func
@@ -81,7 +82,7 @@ class GeneticOptimizer:
 
     def fit_func(self, model):
         block_print()
-        M = self.model_class(initI=self.initI, initN=self.initN, **model)
+        M = self.model_class(initI=self.initI, initR=self.initR, initN=self.initN, **model)
         M.run(T=self.period)
         enable_print()
         predicted_values = list(M.total_num_infections()[10::10])

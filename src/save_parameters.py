@@ -12,3 +12,4 @@ def save_to_json(params, args, path='../results'):
         file_name = "experiment_{}".format(num_of_experiments)
     with open(os.path.join(path, file_name), 'w') as json_file:
         json.dump(params_with_args, json_file, sort_keys=True, indent=4)
+
