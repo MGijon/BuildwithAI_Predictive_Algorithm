@@ -2,7 +2,7 @@ import datetime
 import numpy as np
 import random
 
-from src.api import get_us_daily
+from src.api import get_us_daily, get_states_daily
 from src.save_parameters import save_to_json
 from src.seirs_model import seirs_prediction
 from src.loss_evaluation import mse_loss, mae_loss, weighted_mae_loss
@@ -17,13 +17,20 @@ class Predictor:
     # USA population according to a random internet source
     USA_population = 328_200_000
 
-    def __init__(self, loss_days, init_date, param_ranges=None, genetic_params=None):
+    def __init__(self, loss_days, init_date, state=None, param_ranges=None, genetic_params=None):
         # Prefixed values
         self.loss_days = loss_days
         self.from_this_day_to_predict = init_date
 
         # API Call and data preparation
-        self.US_daily = get_us_daily()
+        if state is None:
+            self.US_daily = get_us_daily()
+            self.state = ""
+        else:
+            self.US_daily = get_states_daily()
+            self.US_daily = self.US_daily[self.US_daily['state'] == state]
+            self.US_daily.set_index('date', inplace=True)
+            self.state = state
 
         # Initialization
         self.real_positives = self.get_real_data()
@@ -122,4 +129,4 @@ class Predictor:
                    'predictions_next_15_days': list(infected_next_15_days),
                    'real_cases_15_days': list(real_positives)}
 
-        save_to_json(self.best, results)
+        save_to_json(self.best, results, state=self.state)
