@@ -86,7 +86,7 @@ class GeneticOptimizer:
         M = self.model_class(initI=self.initI, initR=self.initR, initN=self.initN, **model)
         M.run(T=self.period)
         enable_print()
-        predicted_values = list(M.total_num_infections()[10::10])
+        predicted_values = list(M.numI[10::10])
         return (-self.error_func(predicted_values=predicted_values, real_values=self.real_values),)
 
     def mut_func(self, model):

@@ -161,8 +161,6 @@ class Predictor:
                    'prediction_begin_date': date_to_start_predictions}
 
         to_save = {**self.best, **results}
-
-        save_to_json(to_save, state=self.state)
         return to_save
 
     def generate_data_for_plots(self, date_to_start_predictions, number_of_days):

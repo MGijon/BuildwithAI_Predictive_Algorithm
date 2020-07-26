@@ -7,7 +7,7 @@ BEGIN_DATE = '2020-07-25'
 
 param_ranges = {
     'beta': (0.0001, 2),  # Rate of transmission
-    'sigma': (1 / 14, 2),  # Rate of progression
+    'sigma': (1 / 24, 1.5),  # Rate of progression
     'gamma': (0.0001, 1),  # Rate of recovery
     'mu_I': (0.0001, 1 / 10),  # Rate of DEATH
     'xi': (0.0001, 0.0001)  # Rate of re-susceptibility

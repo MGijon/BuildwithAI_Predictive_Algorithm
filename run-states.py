@@ -15,7 +15,6 @@ NUMBER_OF_DAYS_PREDICTING = 25
 BEGIN_DATE_TRAINING = '2020-06-20'
 BEGIN_DATE_PREDICTING = '2020-07-25'
 
-
 # STATES = ['AS']
 STATES = ['AK', 'AL', 'AR', 'AS', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'GU', 'HI', 'IA', 'ID', 'IL', 'IN',
           'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MP', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM',
@@ -82,20 +81,20 @@ STATE_POPULATIONS = {
 }
 
 param_ranges = {
-                'beta': (0.0001, 2),  # Rate of transmission
-                'sigma': (1 / 14, 1),  # Rate of progression
-                'gamma': (1 / 10, 1),  # Rate of recoveryrecovery
-                'mu_I': (0.0001, 1 / 10),  # Rate of DEATH
-                'xi': (0.0001, 0.0001)  # Rate of re-susceptibility
-            }
+    'beta': (0.0001, 2),  # Rate of transmission
+    'sigma': (1 / 14, 1),  # Rate of progression
+    'gamma': (1 / 10, 1),  # Rate of recoveryrecovery
+    'mu_I': (0.0001, 1 / 10),  # Rate of DEATH
+    'xi': (0.0001, 0.0001)  # Rate of re-susceptibility
+}
 
 genetic_params = {
-                  'max_gen': 30,
-                  'stop_cond': 10000,
-                  'mut_range': 0.1,
-                  'p_regen': 0.2,
-                  'p_mut': 0.4
-            }
+    'max_gen': 30,
+    'stop_cond': 10000,
+    'mut_range': 0.1,
+    'p_regen': 0.2,
+    'p_mut': 0.4
+}
 
 us_results_training = {
     'S': np.zeros(NUMBER_OF_DAYS_TRAINING, dtype=np.float),
@@ -117,7 +116,8 @@ data = get_states_daily()
 data = fill_data(data, '2020-07-25')
 for state in STATES:
     print("Predicting for {}...".format(state))
-    predictor = Predictor(loss_days=NUMBER_OF_DAYS_TRAINING, init_date=BEGIN_DATE_TRAINING, state=state, param_ranges=param_ranges,
+    predictor = Predictor(loss_days=NUMBER_OF_DAYS_TRAINING, init_date=BEGIN_DATE_TRAINING, state=state,
+                          param_ranges=param_ranges,
                           genetic_params=genetic_params, states_data=data, state_population=STATE_POPULATIONS[state])
     iterations = predictor.run(verbose=0)
 
@@ -128,17 +128,19 @@ for state in STATES:
         us_results_training[n] += np.array(training_seir[n])
         us_results_predicting[n] += np.array(prediction_seir[n])
 
-    report_data = predictor.report(BEGIN_DATE_TRAINING, NUMBER_OF_DAYS_TRAINING)
+    report_data = predictor.report(BEGIN_DATE_PREDICTING, NUMBER_OF_DAYS_TRAINING)
 
-    save_to_json(training_seir, file_name='training_seir_{}_{}'.format(state, predictor.best))
-    save_to_json(prediction_seir, file_name='prediction_seir_{}_{}'.format(state, predictor.best))
-    save_to_json(iterations, file_name='iterations_{}_{}'.format(state, predictor.best))
-    save_to_json(report_data, file_name='report_{}_{}'.format(state, predictor.best))
+    save_to_json(training_seir, path='results/states/', file_name='training_seir_{}_{}'.format(state, predictor.best))
+    save_to_json(prediction_seir, path='results/states/',
+                 file_name='prediction_seir_{}_{}'.format(state, predictor.best))
+    save_to_json(iterations, path='results/states/', file_name='iterations_{}_{}'.format(state, predictor.best))
+    save_to_json(report_data, path='results/states/', file_name='report_{}_{}'.format(state, predictor.best))
 
     # predictor.report()
     print("Done!..")
 
-us_predictor = Predictor(loss_days=NUMBER_OF_DAYS_TRAINING, init_date=BEGIN_DATE_TRAINING, param_ranges=param_ranges, genetic_params=genetic_params)
+us_predictor = Predictor(loss_days=NUMBER_OF_DAYS_TRAINING, init_date=BEGIN_DATE_TRAINING, param_ranges=param_ranges,
+                         genetic_params=genetic_params)
 real_data = us_predictor.US_daily
 
 start = datetime.datetime.strptime(us_predictor.from_this_day_to_predict, '%Y-%m-%d')
@@ -158,14 +160,16 @@ while start <= end:
     real_recovered.append(int(us_predictor.US_daily[day]['recovered'].values[0]))
     start += step
 
-print("Predicted infected: {}\nReal infected: {}\n\nPredicted recovered: {}\nTrue recovered: {}".format(us_results_training['I'],
-                                                                                                        real_positives,
-                                                                                                        us_results_training['R'],
-                                                                                                        real_recovered))
-print("MAE for merged data: {}\nWeighted MAE for merged data: {}".format(mean_absolute_error(real_positives, us_results_training['I']),
-                                                                         weighted_mae_loss(us_results_training['I'], real_positives)))
+print("Predicted infected: {}\nReal infected: {}\n\nPredicted recovered: {}\nTrue recovered: {}".format(
+    us_results_training['I'],
+    real_positives,
+    us_results_training['R'],
+    real_recovered))
+print("MAE for merged data: {}\nWeighted MAE for merged data: {}".format(
+    mean_absolute_error(real_positives, us_results_training['I']),
+    weighted_mae_loss(us_results_training['I'], real_positives)))
 
-with open("results/training_states.json", "w+") as json_file:
+with open("results/states/training_states.json", "w+") as json_file:
     json.dump({"S": list(us_results_training["S"]),
                "E": list(us_results_training["E"]),
                "I": list(us_results_training["I"]),
@@ -175,7 +179,7 @@ with open("results/training_states.json", "w+") as json_file:
                "real_R": list(real_recovered)},
               json_file)
 
-with open("results/predicting_states.json", "w+") as json_file:
+with open("results/states/predicting_states.json", "w+") as json_file:
     json.dump({"S": list(us_results_predicting["S"]),
                "E": list(us_results_predicting["E"]),
                "I": list(us_results_predicting["I"]),
