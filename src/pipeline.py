@@ -14,31 +14,23 @@ np.random.seed(1138)
 
 
 class Predictor:
-    def __init__(self, loss_days):
-        #### PREFIXED VALUES ####
+    # USA population according to a random internet source
+    USA_population = 328_200_000
+
+    def __init__(self, loss_days, init_date):
+        # Prefixed values
         self.loss_days = loss_days
-        self.from_this_day_to_predict = '2020-07-01'  # later to change for the '2020-07-27'
-        self.USA_population = 328_200_000  # USA population according to a random internet source
+        self.from_this_day_to_predict = init_date
 
         # API Call and data preparation
         self.US_daily = get_us_daily()
 
+        # Initialization
         self.real_positives = self.get_real_data()
         self.optimizer = None
         self.finished = None
         self.best = None
         self._init_optimizer()
-
-        #### PREDICTION ####
-        ####################
-
-        # # TO OPTIMIZE WITH MAGIC, SORCERY AND ENCHANTMENTS
-        # params = {
-        #     'beta': 0.155,  # Rate of transmission
-        #     'sigma': 1 / 5.2,  # Rate of progression
-        #     'gamma': 1 / 12.39,  # Rate of recovery
-        #     'xi': 0.001  # Rate of re-susceptibility
-        # }
 
     def get_real_data(self):
         start = datetime.datetime.strptime(self.from_this_day_to_predict, '%Y-%m-%d')
