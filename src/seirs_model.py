@@ -1,4 +1,5 @@
 from seirsplus.models import SEIRSModel
+from src.GeneticOptimizer import block_print, enable_print
 
 params = {
     'beta': 0.155,  # Rate of transmission
@@ -9,13 +10,17 @@ params = {
 
 
 def seirs_prediction(initI, initN, **params):
+    block_print()
     model = SEIRSModel(initN=initN, initI=initI, **params)
     model.run(T=15)
+    enable_print()
     return model.total_num_infections()[10::10]
 
 
 def seirs_prediction_with_a_lot_of_stuff(initI, initN, **params):
+    block_print()
     model = SEIRSModel(initN=initN, initI=initI, **params)
     model.run(T=15)
+    enable_print()
     # Return infected, recovered
     return model.numS[10::10], model.numE[10::10], model.numI[10::10], model.numR[10::10], model.numF[10::10]

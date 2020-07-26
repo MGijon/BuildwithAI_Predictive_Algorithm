@@ -100,7 +100,7 @@ class Predictor:
             else:
                 best_counter += 1
             # it can go on quite some time without changing the best fitness, depending on optimizer params
-            if best_counter == 100:
+            if best_counter == 10:
                 self.finished = True
         return iterations
 
@@ -112,7 +112,9 @@ class Predictor:
             initN=self.USA_population,
             **self.best)
 
-        self.pred_positives = infected_next_15_days.reshape(-1, 1)
+        self.pred_positives = list(infected_next_15_days.reshape(-1,))
+
+        return self.pred_positives
 
     def get_errors(self):
         if not self.pred_positives:
