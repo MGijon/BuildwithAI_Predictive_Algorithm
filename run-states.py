@@ -6,7 +6,7 @@ from src.api import get_states_daily, fill_data
 from src.loss_evaluation import mean_absolute_error, weighted_mae_loss
 from src.pipeline import Predictor
 
-# STATES = ['NY']
+# STATES = ['AK']
 STATES = ['AK', 'AL', 'AR', 'AS', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA', 'GU', 'HI', 'IA', 'ID', 'IL', 'IN',
           'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI', 'MN', 'MO', 'MP', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM',
           'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'PR', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VI', 'VT', 'WA', 'WI',
@@ -15,7 +15,8 @@ STATES = ['AK', 'AL', 'AR', 'AS', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA'
 param_ranges = {
                 'beta': (0.0001, 2),  # Rate of transmission
                 'sigma': (1 / 14, 1),  # Rate of progression
-                'gamma': (1 / 10, 1),  # Rate of recovery
+                'gamma': (1 / 10, 1),  # Rate of recoveryrecovery
+                'mu_I': (0.0001, 1 / 10),  # Rate of DEATH
                 'xi': (0.0001, 0.0001)  # Rate of re-susceptibility
             }
 
@@ -81,5 +82,11 @@ print("MAE for merged data: {}\nWeighted MAE for merged data: {}".format(mean_ab
                                                                          weighted_mae_loss(us_results['I'], real_positives)))
 
 with open("results/prediction_states", "w+") as json_file:
-    json.dump({"pred_I": list(us_results["I"]), "real_I": list(real_positives), "pred_R": list(us_results["R"]),
-               "real_R": list(real_recovered)}, json_file)
+    json.dump({"pred_S": list(us_results["S"]),
+               "pred_E": list(us_results["E"]),
+               "pred_I": list(us_results["I"]),
+               "pred_R": list(us_results["R"]),
+               "pred_F": list(us_results["F"]),
+               "real_I": list(real_positives),
+               "real_R": list(real_recovered)},
+              json_file)
