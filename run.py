@@ -1,10 +1,14 @@
+import json
+import os
+
 from src.pipeline import Predictor
-from src.plot_to_gif import generate_gif_from_iterations_for_the_seir_parameters
+from src.plot_to_gif import generate_gif_from_iterations_for_the_seir_parameters, generate_seir_gif
 
 param_ranges = {
     'beta': (0.0001, 2),  # Rate of transmission
     'sigma': (1 / 14, 1),  # Rate of progression
     'gamma': (1 / 10, 1),  # Rate of recovery
+    'mu_I': (0.0001, 1 / 10),  # Rate of DEATH
     'xi': (0.0001, 0.0001)  # Rate of re-susceptibility
 }
 
@@ -21,5 +25,8 @@ iterations = predictor.run(verbose=1)
 
 predictor.report()
 
-# This takes a while to save the gif, use frames_to_save to avoid it to take too long
-generate_gif_from_iterations_for_the_seir_parameters(iterations, frames_to_save=30)
+seir_data = predictor.generate_data_for_plots()
+
+generate_seir_gif(seir_data)
+
+generate_gif_from_iterations_for_the_seir_parameters(iterations)

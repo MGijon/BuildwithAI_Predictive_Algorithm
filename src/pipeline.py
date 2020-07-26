@@ -100,7 +100,7 @@ class Predictor:
             else:
                 best_counter += 1
             # it can go on quite some time without changing the best fitness, depending on optimizer params
-            if best_counter == 10:
+            if best_counter == 100:
                 self.finished = True
         return iterations
 
