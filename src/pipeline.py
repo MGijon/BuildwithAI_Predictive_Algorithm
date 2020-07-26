@@ -85,7 +85,7 @@ class Predictor:
                                           initR=self.US_daily[self.from_this_day_to_predict]['recovered'].values[0],
                                           initN=self.state_population if self.state else self.USA_population,
                                           param_ranges=param_ranges,
-                                          error_func=mse_loss,
+                                          error_func=weighted_mse_loss,
                                           real_values=self.real_positives,
                                           period=self.loss_days,
                                           **genetic_params)
@@ -153,10 +153,12 @@ class Predictor:
         int_real_positives = map(int, self.real_positives)
         int_predicted_in_future_period = map(int, prediced_in_future_period)
         results = {'MSE': mse_error, 'MAE': mae_error, 'Weighted MAE': wmae_error,
-                   'validation_predictions_({})'.format(self.from_this_day_to_predict): list(
+                   'validation_predictions': list(
                        int_predicted_in_validation_period),
-                   'real_cases_({})'.format(self.from_this_day_to_predict): list(int_real_positives),
-                   'final_prediction_({})'.format(date_to_start_predictions): list(int_predicted_in_future_period)}
+                   'real_cases': list(int_real_positives),
+                   'final_prediction': list(int_predicted_in_future_period),
+                   'validation_begin_date': self.from_this_day_to_predict,
+                   'prediction_begin_date': date_to_start_predictions}
 
         to_save = {**self.best, **results}
 

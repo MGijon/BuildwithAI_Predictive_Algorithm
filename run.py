@@ -1,5 +1,6 @@
 from src.pipeline import Predictor
 from src.save_parameters import save_to_json
+import numpy as np
 
 NUMBER_OF_DAYS = 25
 
@@ -14,7 +15,7 @@ param_ranges = {
 }
 
 genetic_params = {
-    'max_gen': 2000,
+    'max_gen': 3000,
     'stop_cond': 10000,
     'mut_range': 0.1,
     'p_regen': 0.2,
@@ -28,6 +29,8 @@ report_data = predictor.report(BEGIN_DATE, NUMBER_OF_DAYS)
 
 seir_data = predictor.generate_data_for_plots(BEGIN_DATE, NUMBER_OF_DAYS)
 
-save_to_json(seir_data, file_name='seir_{}'.format(predictor.best))
-save_to_json(iterations, file_name='iterations_{}'.format(predictor.best))
-save_to_json(report_data, file_name='report_{}'.format(predictor.best))
+parameters = '_'.join(['{}-{:.3f}'.format(k, v) for k, v in predictor.best.items()])
+
+save_to_json(seir_data, file_name='seir_{}'.format(parameters))
+save_to_json(iterations, file_name='iterations_{}'.format(parameters))
+save_to_json(report_data, file_name='report_{}'.format(parameters))
