@@ -5,7 +5,7 @@ import random
 from src.api import get_us_daily
 from src.save_parameters import save_to_json
 from src.seirs_model import seirs_prediction
-from src.loss_evaluation import mse_loss, mae_loss
+from src.loss_evaluation import mse_loss, mae_loss, weighted_mae_loss
 from src.GeneticOptimizer import GeneticOptimizer
 from seirsplus.models import SEIRSModel
 
@@ -106,15 +106,15 @@ class Predictor:
 
         mse_error = mse_loss(predicted_values=infected_next_15_days.reshape(-1, 1), real_values=self.real_positives)
         mae_error = mae_loss(predicted_values=infected_next_15_days.reshape(-1, 1), real_values=self.real_positives)
-        # error_absolute_weights = custom_loss(predicted_values=infected_next_15_days.reshape(-1, 1),
-        #                                      real_values=real_positives,
-        #                                      sample_weight=[])
+        wmae_error = weighted_mae_loss(predicted_values=infected_next_15_days.reshape(-1, 1), real_values=self.real_positives)
 
         print('MSE: ', mse_error)
         print('MAE: ', mae_error)
+        print('Weighted MAE: ', wmae_error)
         infected_next_15_days = map(int, infected_next_15_days)
         real_positives = map(int, self.real_positives)
-        results = {'MSE': mse_error, 'MAE': mae_error, 'predictions_next_15_days': list(infected_next_15_days),
+        results = {'MSE': mse_error, 'MAE': mae_error, 'Weighted MAE': wmae_error,
+                   'predictions_next_15_days': list(infected_next_15_days),
                    'real_cases_15_days': list(real_positives)}
 
         save_to_json(self.best, results)
