@@ -85,12 +85,12 @@ class Predictor:
                                           initR=self.US_daily[self.from_this_day_to_predict]['recovered'].values[0],
                                           initN=self.state_population if self.state else self.USA_population,
                                           param_ranges=param_ranges,
-                                          error_func=weighted_mse_loss,
+                                          error_func=mse_loss,
                                           real_values=self.real_positives,
                                           period=self.loss_days,
                                           **genetic_params)
 
-        self.optimizer.initialize(population=100)
+        self.optimizer.initialize(population=200)
         self.finished = False
 
     def run(self, verbose=0):
@@ -129,7 +129,7 @@ class Predictor:
 
         mse_error = mse_loss(predicted_values=predicted_in_validation_period, real_values=self.real_positives)
         mae_error = mae_loss(predicted_values=predicted_in_validation_period, real_values=self.real_positives)
-        wmae_error = weighted_mae_loss(predicted_values=predicted_in_validation_period, real_values=self.real_positives)
+        wmae_error = weighted_mae_loss(predicted_values=predicted_in_validation_period, real_values=self.real_positives,number_of_instances=self.loss_days)
 
         return mse_error, mae_error, wmae_error
 

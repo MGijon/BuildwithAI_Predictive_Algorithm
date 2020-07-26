@@ -1,6 +1,5 @@
 from src.pipeline import Predictor
 from src.save_parameters import save_to_json
-import numpy as np
 
 NUMBER_OF_DAYS = 25
 
@@ -22,7 +21,7 @@ genetic_params = {
     'p_mut': 0.4
 }
 
-predictor = Predictor(loss_days=45, init_date='2020-06-10', param_ranges=param_ranges, genetic_params=genetic_params)
+predictor = Predictor(loss_days=35, init_date='2020-06-20', param_ranges=param_ranges, genetic_params=genetic_params)
 iterations = predictor.run(verbose=1)
 
 report_data = predictor.report(BEGIN_DATE, NUMBER_OF_DAYS)
