@@ -5,7 +5,7 @@ import random
 from src.api import get_us_daily, get_states_daily
 from src.save_parameters import save_to_json
 from src.seirs_model import seirs_prediction, seirs_prediction_with_a_lot_of_stuff
-from src.loss_evaluation import mse_loss, mae_loss, weighted_mae_loss
+from src.loss_evaluation import mse_loss, mae_loss, weighted_mae_loss, weighted_mse_loss
 from src.GeneticOptimizer import GeneticOptimizer
 from seirsplus.models import SEIRSModel
 
@@ -15,10 +15,10 @@ np.random.seed(1138)
 
 class Predictor:
     # USA population according to a random internet source
-    USA_population = 328_200_000
+    USA_population = 334_737_043
 
     def __init__(self, loss_days, init_date, state=None, param_ranges=None, genetic_params=None, states_data=None,
-                 training=True):
+                 training=True, state_population=None):
         # Prefixed values
         self.loss_days = loss_days
         self.from_this_day_to_predict = init_date
@@ -28,6 +28,7 @@ class Predictor:
             self.US_daily = get_us_daily()
             self.state = ""
         else:
+            self.state_population = state_population
             if states_data is None:
                 self.US_daily = get_states_daily()
             else:
@@ -82,7 +83,7 @@ class Predictor:
         self.optimizer = GeneticOptimizer(SEIRSModel,
                                           initI=self.US_daily[self.from_this_day_to_predict]['positive'].values[0],
                                           initR=self.US_daily[self.from_this_day_to_predict]['recovered'].values[0],
-                                          initN=self.USA_population,
+                                          initN=self.state_population if self.state else self.USA_population,
                                           param_ranges=param_ranges,
                                           error_func=mse_loss,
                                           real_values=self.real_positives,
@@ -114,7 +115,7 @@ class Predictor:
         # Apply the model and optain a prediction for the next 15 days
         infected_next_15_days = seirs_prediction(
             initI=self.US_daily[date_to_start_predictions]['positive'].values[0],
-            initN=self.USA_population,
+            initN=self.state_population if self.state else self.USA_population,
             initR=self.US_daily[date_to_start_predictions]['recovered'].values[0],
             predict_num_days=number_of_days,
             **self.best)
@@ -165,7 +166,7 @@ class Predictor:
     def generate_data_for_plots(self, date_to_start_predictions, number_of_days):
         prediced_s, prediced_e, prediced_i, prediced_r, prediced_f = seirs_prediction_with_a_lot_of_stuff(
             initI=self.US_daily[date_to_start_predictions]['positive'].values[0],
-            initN=self.USA_population,
+            initN=self.state_population if self.state else self.USA_population,
             initR=self.US_daily[date_to_start_predictions]['recovered'].values[0],
             predict_num_days=number_of_days,
             **self.best)

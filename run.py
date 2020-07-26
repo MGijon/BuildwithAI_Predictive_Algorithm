@@ -1,7 +1,7 @@
 from src.pipeline import Predictor
 from src.save_parameters import save_to_json
 
-NUMBER_OF_DAYS = 21
+NUMBER_OF_DAYS = 25
 
 BEGIN_DATE = '2020-07-25'
 
@@ -14,7 +14,7 @@ param_ranges = {
 }
 
 genetic_params = {
-    'max_gen': 3,
+    'max_gen': 2000,
     'stop_cond': 10000,
     'mut_range': 0.1,
     'p_regen': 0.2,
