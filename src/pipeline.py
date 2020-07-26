@@ -26,6 +26,7 @@ class Predictor:
         self.US_daily = get_us_daily()
 
         # Initialization
+        self.pred_positives = None
         self.real_positives = self.get_real_data()
         self.optimizer = None
         self.finished = None
@@ -96,30 +97,44 @@ class Predictor:
                 self.finished = True
         return iterations
 
-    def report(self):
-        print(self.real_positives)
-
+    def get_pred_positives(self):
+        assert self.best is not None
         # Apply the model and optain a prediction for the next 15 days
         infected_next_15_days = seirs_prediction(
             initI=self.US_daily[self.from_this_day_to_predict]['positive'].values[0],
             initN=self.USA_population,
             **self.best)
 
-        print('Predictions from the next 15 days: ', [np.floor(x) for x in infected_next_15_days])
+        self.pred_positives = infected_next_15_days.reshape(-1, 1)
 
-        print('Real cases: ', self.real_positives)
+    def get_errors(self):
+        if not self.pred_positives:
+            self.get_pred_positives()
 
-        mse_error = mse_loss(predicted_values=infected_next_15_days.reshape(-1, 1), real_values=self.real_positives)
-        mae_error = mae_loss(predicted_values=infected_next_15_days.reshape(-1, 1), real_values=self.real_positives)
-        wmae_error = weighted_mae_loss(predicted_values=infected_next_15_days.reshape(-1, 1), real_values=self.real_positives)
+        mse_error = mse_loss(predicted_values=self.pred_positives, real_values=self.real_positives)
+        mae_error = mae_loss(predicted_values=self.pred_positives, real_values=self.real_positives)
+        wmae_error = weighted_mae_loss(predicted_values=self.pred_positives, real_values=self.real_positives)
+
+        return mse_error, mae_error, wmae_error
+
+    def report(self):
+        if not self.pred_positives:
+            self.get_pred_positives()
+
+        print("Real cases: {}".format(self.real_positives))
+        print("Pred cases: {}".format(self.pred_positives))
+
+        print('Predictions from the next 15 days: ', [np.floor(x) for x in self.pred_positives])
+
+        mse_error, mae_error, wmae_error = self.get_errors()
 
         print('MSE: ', mse_error)
         print('MAE: ', mae_error)
         print('Weighted MAE: ', wmae_error)
-        infected_next_15_days = map(int, infected_next_15_days)
-        real_positives = map(int, self.real_positives)
+        int_pred_positives = map(int, self.pred_positives)
+        int_real_positives = map(int, self.real_positives)
         results = {'MSE': mse_error, 'MAE': mae_error, 'Weighted MAE': wmae_error,
-                   'predictions_next_15_days': list(infected_next_15_days),
-                   'real_cases_15_days': list(real_positives)}
+                   'predictions_next_15_days': list(int_pred_positives),
+                   'real_cases_15_days': list(int_real_positives)}
 
         save_to_json(self.best, results)
