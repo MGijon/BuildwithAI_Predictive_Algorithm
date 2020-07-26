@@ -1,6 +1,7 @@
 NO_COMMIT_TESTS
 NO_COMMIT_TESTS/DATA
 .DS_Store
+results
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
