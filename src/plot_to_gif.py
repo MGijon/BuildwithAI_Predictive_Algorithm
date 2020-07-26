@@ -10,6 +10,10 @@ import seaborn as sns
 sns.set()
 
 
+def plot_prediction():
+    pass
+
+
 def generate_gif_from_iterations_for_the_seir_parameters(params, path='results/plots', name='beta_gamma_sigma',
                                                          frames_to_save=None):
     params = pd.DataFrame(params)
@@ -41,7 +45,7 @@ def generate_gif_from_iterations_for_the_seir_parameters(params, path='results/p
     anim.save(os.path.join(path, '{}.gif'.format(name)), dpi=200, writer='imagemagick')
 
 
-def generate_seir_gif(seir, path='results/plots', name='seir',):
+def generate_seir_gif(seir, path='results/plots', name='seir', ):
     seir = pd.DataFrame(seir)
 
     fig, ax = plt.subplots(figsize=(6, 4))
@@ -52,7 +56,7 @@ def generate_seir_gif(seir, path='results/plots', name='seir',):
     def update(i):
         labels = seir.columns
         sizes = seir.iloc[i].values
-        g = sns.barplot(x=labels, y=sizes,order=list('SEIRF'))
+        g = sns.barplot(x=labels, y=sizes, order=list('SEIRF'))
         g.set_yscale("log")
         plt.title('SEIR values at day {}'.format(i))
         ax.set_ylabel('log scale')
