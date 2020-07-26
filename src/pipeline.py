@@ -133,7 +133,7 @@ class Predictor:
         print("Real cases: {}".format(self.real_positives))
         print("Pred cases: {}".format(self.pred_positives))
 
-        print('Predictions from the next 15 days: ', [np.floor(x) for x in self.pred_positives])
+        print('Predictions from the next 15 days: ', [int(np.floor(x)) for x in self.pred_positives])
 
         mse_error, mae_error, wmae_error = self.get_errors()
 
