@@ -2,7 +2,9 @@ import json
 import os
 
 
-def save_to_json(params, args, path='../results'):
+def save_to_json(params, args, path=None):
+    if path is None:
+        path = os.path.join(os.path.dirname(__file__), os.pardir, 'results')
     os.makedirs(path, exist_ok=True)
     params_with_args = {**params, **args}
     num_of_experiments = len(os.listdir(path))
