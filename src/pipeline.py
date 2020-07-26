@@ -57,7 +57,7 @@ class Predictor:
                 'beta': (0.0001, 2),  # Rate of transmission
                 'sigma': (1 / 14, 1),  # Rate of progression
                 'gamma': (1 / 10, 1),  # Rate of recovery
-                'xi': (0.001, 0.001)  # Rate of re-susceptibility
+                'xi': (0.0001, 0.0001)  # Rate of re-susceptibility
             }
         if not genetic_params:
             genetic_params = {
