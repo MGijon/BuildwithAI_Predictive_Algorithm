@@ -1,10 +1,8 @@
-import json
 import datetime
-import requests
 import numpy as np
-import pandas as pd
 import random
 
+from src.api import get_us_daily
 from src.save_parameters import save_to_json
 from src.seirs_model import seirs_prediction
 from src.loss_evaluation import mse_loss, mae_loss
@@ -19,16 +17,7 @@ from_this_day_to_predict = '2020-07-01'  # later to change for the '2020-07-27'
 USA_population = 328_200_000  # USA population according to a random internet source
 
 # API Call and data preparation
-payload = {}
-headers = {}
-
-url = "https://covidtracking.com/api/us/daily"
-response_US_Daily = requests.request("GET", url, headers=headers, data=payload)
-
-US_daily = pd.DataFrame(json.loads(response_US_Daily.text))
-
-US_daily['date'] = pd.to_datetime(US_daily['date'], format='%Y%m%d')
-US_daily.set_index('date', inplace=True)
+US_daily = get_us_daily()
 
 #### PREDICTION ####
 ####################
