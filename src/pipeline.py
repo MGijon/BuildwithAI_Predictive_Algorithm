@@ -4,7 +4,7 @@ import random
 
 from src.api import get_us_daily, get_states_daily
 from src.save_parameters import save_to_json
-from src.seirs_model import seirs_prediction
+from src.seirs_model import seirs_prediction, seirs_prediction_with_a_lot_of_stuff
 from src.loss_evaluation import mse_loss, mae_loss, weighted_mae_loss
 from src.GeneticOptimizer import GeneticOptimizer
 from seirsplus.models import SEIRSModel
@@ -68,11 +68,11 @@ class Predictor:
             }
         if not genetic_params:
             genetic_params = {
-                  'max_gen': 3000,
-                  'stop_cond': 10000,
-                  'mut_range': 0.1,
-                  'p_regen': 0.2,
-                  'p_mut': 0.4
+                'max_gen': 3000,
+                'stop_cond': 10000,
+                'mut_range': 0.1,
+                'p_regen': 0.2,
+                'p_mut': 0.4
             }
         self.optimizer = GeneticOptimizer(SEIRSModel,
                                           initI=self.US_daily[self.from_this_day_to_predict]['positive'].values[0],
@@ -145,3 +145,17 @@ class Predictor:
                    'real_cases_15_days': list(int_real_positives)}
 
         save_to_json(self.best, results, state=self.state)
+
+    def generate_data_for_plots(self):
+        prediced_s, prediced_e, prediced_i, prediced_r, prediced_f = seirs_prediction_with_a_lot_of_stuff(
+            initI=self.US_daily[self.from_this_day_to_predict]['positive'].values[0],
+            initN=self.USA_population,
+            **self.best)
+        prediced_s = list(map(int, prediced_s))
+        prediced_e = list(map(int, prediced_e))
+        prediced_i = list(map(int, prediced_i))
+        prediced_r = list(map(int, prediced_r))
+        prediced_f = list(map(int, prediced_f))
+
+        for_saving = {'S': prediced_s, 'E': prediced_e, 'I': prediced_i, 'R': prediced_r, 'F': prediced_f}
+        return for_saving
