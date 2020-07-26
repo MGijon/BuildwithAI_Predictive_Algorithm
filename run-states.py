@@ -7,10 +7,12 @@ from src.loss_evaluation import mean_absolute_error, weighted_mae_loss
 from src.pipeline import Predictor
 
 # STATES = ['AK']
-NUMBER_OF_DAYS_TRAINING = 45
+from src.save_parameters import save_to_json
+
+NUMBER_OF_DAYS_TRAINING = 35
 NUMBER_OF_DAYS_PREDICTING = 25
 
-BEGIN_DATE_TRAINING = '2020-06-10'
+BEGIN_DATE_TRAINING = '2020-06-20'
 BEGIN_DATE_PREDICTING = '2020-07-25'
 
 
@@ -96,19 +98,19 @@ genetic_params = {
             }
 
 us_results_training = {
-    'S': np.zeros(45, dtype=np.float),
-    'E': np.zeros(45, dtype=np.float),
-    'I': np.zeros(45, dtype=np.float),
-    'R': np.zeros(45, dtype=np.float),
-    'F': np.zeros(45, dtype=np.float)
+    'S': np.zeros(NUMBER_OF_DAYS_TRAINING, dtype=np.float),
+    'E': np.zeros(NUMBER_OF_DAYS_TRAINING, dtype=np.float),
+    'I': np.zeros(NUMBER_OF_DAYS_TRAINING, dtype=np.float),
+    'R': np.zeros(NUMBER_OF_DAYS_TRAINING, dtype=np.float),
+    'F': np.zeros(NUMBER_OF_DAYS_TRAINING, dtype=np.float)
 }
 
 us_results_predicting = {
-    'S': np.zeros(45, dtype=np.float),
-    'E': np.zeros(45, dtype=np.float),
-    'I': np.zeros(45, dtype=np.float),
-    'R': np.zeros(45, dtype=np.float),
-    'F': np.zeros(45, dtype=np.float)
+    'S': np.zeros(NUMBER_OF_DAYS_PREDICTING, dtype=np.float),
+    'E': np.zeros(NUMBER_OF_DAYS_PREDICTING, dtype=np.float),
+    'I': np.zeros(NUMBER_OF_DAYS_PREDICTING, dtype=np.float),
+    'R': np.zeros(NUMBER_OF_DAYS_PREDICTING, dtype=np.float),
+    'F': np.zeros(NUMBER_OF_DAYS_PREDICTING, dtype=np.float)
 }
 
 data = get_states_daily()
@@ -117,19 +119,21 @@ for state in STATES:
     print("Predicting for {}...".format(state))
     predictor = Predictor(loss_days=NUMBER_OF_DAYS_TRAINING, init_date=BEGIN_DATE_TRAINING, state=state, param_ranges=param_ranges,
                           genetic_params=genetic_params, states_data=data, state_population=STATE_POPULATIONS[state])
-    iterations = predictor.run()
+    iterations = predictor.run(verbose=0)
 
-    state_results = predictor.generate_data_for_plots(BEGIN_DATE_TRAINING, NUMBER_OF_DAYS_TRAINING)
-    for n in state_results:
-        us_results_training[n] += np.array(state_results[n])
+    training_seir = predictor.generate_data_for_plots(BEGIN_DATE_TRAINING, NUMBER_OF_DAYS_TRAINING)
+    prediction_seir = predictor.generate_data_for_plots(BEGIN_DATE_PREDICTING, NUMBER_OF_DAYS_PREDICTING)
 
-    with open('results/iterations_{}.json'.format(state), 'w+') as json_file:
-        json.dump(iterations, json_file, sort_keys=True, indent=4)
+    for n in training_seir:
+        us_results_training[n] += np.array(training_seir[n])
+        us_results_predicting[n] += np.array(prediction_seir[n])
 
-    seir_data = predictor.generate_data_for_plots(BEGIN_DATE_PREDICTING, NUMBER_OF_DAYS_PREDICTING)
+    report_data = predictor.report(BEGIN_DATE_TRAINING, NUMBER_OF_DAYS_TRAINING)
 
-    with open('results/seir_{}.json'.format(state), 'w+') as json_file:
-        json.dump(seir_data, json_file, sort_keys=True, indent=4)
+    save_to_json(training_seir, file_name='training_seir_{}_{}'.format(state, predictor.best))
+    save_to_json(prediction_seir, file_name='prediction_seir_{}_{}'.format(state, predictor.best))
+    save_to_json(iterations, file_name='iterations_{}_{}'.format(state, predictor.best))
+    save_to_json(report_data, file_name='report_{}_{}'.format(state, predictor.best))
 
     # predictor.report()
     print("Done!..")
@@ -161,7 +165,7 @@ print("Predicted infected: {}\nReal infected: {}\n\nPredicted recovered: {}\nTru
 print("MAE for merged data: {}\nWeighted MAE for merged data: {}".format(mean_absolute_error(real_positives, us_results_training['I']),
                                                                          weighted_mae_loss(us_results_training['I'], real_positives)))
 
-with open("results/prediction_states.json", "w+") as json_file:
+with open("results/training_states.json", "w+") as json_file:
     json.dump({"S": list(us_results_training["S"]),
                "E": list(us_results_training["E"]),
                "I": list(us_results_training["I"]),
@@ -169,4 +173,12 @@ with open("results/prediction_states.json", "w+") as json_file:
                "F": list(us_results_training["F"]),
                "real_I": list(real_positives),
                "real_R": list(real_recovered)},
+              json_file)
+
+with open("results/predicting_states.json", "w+") as json_file:
+    json.dump({"S": list(us_results_predicting["S"]),
+               "E": list(us_results_predicting["E"]),
+               "I": list(us_results_predicting["I"]),
+               "R": list(us_results_predicting["R"]),
+               "F": list(us_results_predicting["F"])},
               json_file)
