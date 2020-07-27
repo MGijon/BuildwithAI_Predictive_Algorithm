@@ -24,12 +24,6 @@ Our proposed predictive algorithm combines epidemiology models and genetic algor
 
 However, this model depends on a set of parameters and its resulting prediction changes based on them. So, we want to find the set of parameters that better fits the current curve of positive cases, expecting that the model will generalize to the following days we want to predict.
 
-<p align="center">
-  <img src="parameters.png"
-       alt="Evolution of the parameters"
-       style="max-width: 50%;"/>
-</p>
-
 We propose to estimate the best set of parameters based on a Genetic Algorithm. The Genetic Algorithm considers several sets of parameters, re-combines them, and makes mutations to look for the parameters that better fit the current curve.
 
 We apply our proposed algorithm to each state separately, obtaining specialized models capable of handling the specific conditions of each state.
@@ -54,4 +48,4 @@ Finally, aggregating results from each state, we obtain our final prediction cur
 * Manuel Gijón Agudo
 * Dídac Fernández Cadenas
 * Leo Lamsdorff
-* Idril Geer 
+* Idril Geer
