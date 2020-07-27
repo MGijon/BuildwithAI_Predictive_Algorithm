@@ -39,6 +39,7 @@ Finally, aggregating results from each state, we obtain our final prediction cur
 <p align="center"">
 <img src="teamlogo.png"
      alt="Logo of the team"
+     width="200" height="200"
      style="max-width: 25%;" />
 </p>
 
